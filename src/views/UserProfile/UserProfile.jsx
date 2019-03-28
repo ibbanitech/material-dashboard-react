@@ -14,6 +14,9 @@ import CardBody from "components/Card/CardBody.jsx";
 import CardFooter from "components/Card/CardFooter.jsx";
 
 import avatar from "assets/img/faces/marc.jpg";
+import { func } from "prop-types";
+
+import * as firebase from "firebase";
 
 const styles = {
   cardCategoryWhite: {
@@ -34,6 +37,37 @@ const styles = {
   }
 };
 
+function makeid(length) {
+  var text = "";
+  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
+
+  for (var i = 0; i < length; i++)
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+  return text;
+}
+
+
+function handleUpdateClick(){
+
+  firebase.auth().createUserWithEmailAndPassword(document.getElementById('email').value,
+  makeid(13)).then(function(){
+    firebase.auth().sendPasswordResetEmail(document.getElementById('email').value).then(function(){
+      var key = firebase.auth().currentUser.uid;
+      window.onload = localStorage.setItem("UID",key);
+      var pushData = {
+        username: document.getElementById('username').value,
+        Email_Address: document.getElementById('email').value,
+        First_Name: document.getElementById('first-name').value,
+        Last_Name: document.getElementById('last-name').value
+      }
+      firebase.database().ref().child("users").child(key).set(pushData).then(function(){
+        window.alert("You have been Registered successfully and an email has been sent to change your password");
+      });
+    });
+  })
+}
+
 function UserProfile(props) {
   const { classes } = props;
   return (
@@ -41,10 +75,11 @@ function UserProfile(props) {
       <GridContainer>
         <GridItem xs={12} sm={12} md={8}>
           <Card>
-            <CardHeader color="primary">
+            <CardHeader color="info">
               <h4 className={classes.cardTitleWhite}>Edit Profile</h4>
               <p className={classes.cardCategoryWhite}>Complete your profile</p>
             </CardHeader>
+            
             <CardBody>
               <GridContainer>
                 <GridItem xs={12} sm={12} md={5}>
@@ -71,7 +106,7 @@ function UserProfile(props) {
                 <GridItem xs={12} sm={12} md={4}>
                   <CustomInput
                     labelText="Email address"
-                    id="email-address"
+                    id="email"
                     formControlProps={{
                       fullWidth: true
                     }}
@@ -101,8 +136,8 @@ function UserProfile(props) {
               <GridContainer>
                 <GridItem xs={12} sm={12} md={4}>
                   <CustomInput
-                    labelText="City"
-                    id="city"
+                    labelText="Address"
+                    id="address"
                     formControlProps={{
                       fullWidth: true
                     }}
@@ -110,8 +145,8 @@ function UserProfile(props) {
                 </GridItem>
                 <GridItem xs={12} sm={12} md={4}>
                   <CustomInput
-                    labelText="Country"
-                    id="country"
+                    labelText="City"
+                    id="city"
                     formControlProps={{
                       fullWidth: true
                     }}
@@ -127,47 +162,11 @@ function UserProfile(props) {
                   />
                 </GridItem>
               </GridContainer>
-              <GridContainer>
-                <GridItem xs={12} sm={12} md={12}>
-                  <InputLabel style={{ color: "#AAAAAA" }}>About me</InputLabel>
-                  <CustomInput
-                    labelText="Lamborghini Mercy, Your chick she so thirsty, I'm in that two seat Lambo."
-                    id="about-me"
-                    formControlProps={{
-                      fullWidth: true
-                    }}
-                    inputProps={{
-                      multiline: true,
-                      rows: 5
-                    }}
-                  />
-                </GridItem>
-              </GridContainer>
             </CardBody>
+            
             <CardFooter>
-              <Button color="primary">Update Profile</Button>
+              <Button color="info" onClick={handleUpdateClick}>Update Profile</Button>
             </CardFooter>
-          </Card>
-        </GridItem>
-        <GridItem xs={12} sm={12} md={4}>
-          <Card profile>
-            <CardAvatar profile>
-              <a href="#pablo" onClick={e => e.preventDefault()}>
-                <img src={avatar} alt="..." />
-              </a>
-            </CardAvatar>
-            <CardBody profile>
-              <h6 className={classes.cardCategory}>CEO / CO-FOUNDER</h6>
-              <h4 className={classes.cardTitle}>Alec Thompson</h4>
-              <p className={classes.description}>
-                Don't be scared of the truth because we need to restart the
-                human foundation in truth And I love you like Kanye loves Kanye
-                I love Rick Owens’ bed design but the back is...
-              </p>
-              <Button color="primary" round>
-                Follow
-              </Button>
-            </CardBody>
           </Card>
         </GridItem>
       </GridContainer>
